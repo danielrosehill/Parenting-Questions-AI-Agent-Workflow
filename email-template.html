@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dr Dovid Berry Report</title>
+</head>
+<body style="font-family: Georgia, serif; background-color: #e6ecf1; margin: 0; padding: 2em; color: #333;">
+  <div style="background-color: #ffffff; border: 1px solid #d0d7de; border-radius: 10px; max-width: 740px; margin: auto; padding: 2em; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);">
+
+    <!-- Form Link -->
+    <div style="text-align: center; margin-bottom: 1.5em; font-size: 0.95em;">
+      Want to ask Dr. Dovid Berry your own question?
+      <a href="https://tally.so/r/nPZNke" target="_blank" style="color: #0072ce; text-decoration: underline; font-weight: 500;">Click here to open the form</a>
+    </div>
+
+    <!-- Header with floated image -->
+    <div style="overflow: hidden; margin-bottom: 1.5em;">
+      <img src="https://example.com/path/to/dovid-berry-icon.png" alt="Dr. Dovid Berry"
+           style="width: 96px; height: 96px; border-radius: 50%; float: left; margin-right: 20px; margin-bottom: 10px;" />
+      <div>
+        <h1 style="margin: 0; font-size: 1.4em; font-weight: bold; color: #222;">Your Personalised Parenting Advice From Dr Dovid Berry MD</h1>
+        <h2 style="margin: 0.3em 0 0; font-size: 1.1em; font-weight: normal; color: #444;">
+          {{ SUMMARY_HUMAN_READABLE }}
+        </h2>
+      </div>
+    </div>
+
+    <!-- Greeting -->
+    <p>Dear Hannah and Daniel,</p>
+    <p>I'm pleased to provide the report to your prompt as requested.</p>
+
+    <!-- Prompt -->
+    <div style="background: #f1f5f9; border-left: 5px solid #0072ce; padding: 1em; margin: 2em 0 1em; font-style: italic; font-size: 0.97em;">
+      <strong>Your Question:</strong><br />
+      {{ USER_QUESTION }}
+    </div>
+
+    <!-- View in Drive Button -->
+    <div style="text-align: center; margin: 1em 0 2em;">
+      <a href="{{ GOOGLE_DRIVE_LINK }}" target="_blank"
+         style="display: inline-block; padding: 0.9em 1.6em; background-color: #0072ce; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 1em;">
+        View in Google Drive
+      </a>
+      <div style="font-size: 0.9em; color: #555; margin-top: 0.6em;">
+        This file has also been saved to your Residence Google Drive account.
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div style="font-size: 1em; margin-top: 2em;">
+      {{ HTML_RESPONSE }}
+    </div>
+
+    <!-- Signature -->
+    <p style="margin-top: 2.5em; font-style: italic;">
+      Yours thoughtfully,<br />
+      <strong>Dr. Dovid Berry</strong><br />
+      AI Parenting Question Specialist, DSR Holdings
+    </p>
+
+    <!-- Footer Link -->
+    <div style="text-align: center; margin-top: 3em; font-size: 0.95em;">
+      Want to ask Dr. Dovid Berry your own question?
+      <a href="https://tally.so/r/nPZNke" target="_blank" style="color: #0072ce; text-decoration: underline;">Click here to open the question form</a>.
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,307 @@
+{
+  "name": "Dr Dovid Berry",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "YOUR_WEBHOOK_PATH_HERE",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -460,
+        -20
+      ],
+      "id": "70743b96-bc73-455e-b597-30d383dd3fa6",
+      "name": "Webhook",
+      "webhookId": "YOUR_WEBHOOK_ID_HERE"
+    },
+    {
+      "parameters": {
+        "jsCode": "const fields = $json.body.data.fields;\n\n// Extract the prompt field\nconst promptField = fields.find(f => f.label === \"Your question for Dr Dovid Berry\");\nconst prompt = promptField?.value ?? \"\";\n\n// Map recipient names to email addresses\nconst recipientMap = {\n  \"User1\": \"user1@example.com\",\n  \"User2\": \"user2@example.com\"\n};\n\n// Get selected recipient option IDs\nconst recipientField = fields.find(f => f.label === \"Send answer to\");\nconst selectedIds = recipientField?.value ?? [];\n\n// Match IDs to option text and map to emails\nconst recipients = selectedIds\n  .map(id => {\n    const matchedOption = recipientField.options.find(opt => opt.id === id);\n    return recipientMap[matchedOption?.text];\n  })\n  .filter(email => !!email);\n\n// Return prompt and comma-separated recipients string\nreturn [\n  {\n    json: {\n      prompt,\n      recipients: recipients.join(\",\")\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -200,
+        -40
+      ],
+      "id": "c462f675-1007-4348-914a-1d72c708903a",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": " \nYou are Dr Dovid Berry, a jocular but deeply incisive parenting research assistant dedicated to helping parents with their young children.\nWhenever you're asked a question, respond with a thoroughly researched, thoughtful, and well-structured answer. Your role is to dig deep into the scientific consensus, evidence-based parenting literature, and credible health and developmental sources to deliver reliable guidance.\nYour output must be returned as a JSON object with the following structure:\n{\n  \"summary_file_safe\": \"a-concise-summary-in-lowercase-with-hyphens-suitable-for-filenames\",\n  \"summary_human_readable\": \"A short, descriptive title suitable for human-readable filenames (title case)\",\n  \"summarised_prompt\": \"A brief summary of the user's original question or request\",\n  \"html_response\": \"<p>HTML body content only — suitable for embedding in emails</p>\",\n  \"html_full_document\": \"<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>Full HTML content here</body></html>\"\n}\nYou must include:\nA clear and comprehensive explanation of the topic\n\n\nRelevant context for new parents\n\n\nPractical takeaways rooted in research and experience\n\n\nReferences to reputable sources when possible (academic, medical, or government)\n\n\nYou must also provide:\nhtml_response containing only the <body> HTML, for email use\n\n\nhtml_full_document as a fully valid HTML document, for conversion to PDF\n\n\nA summarised_prompt that captures the user's request in one sentence\n\n\nMaintain your signature voice: thoughtful, warm, witty — but always precise. Avoid generic fluff or surface-level tips. Your job is to inform, not entertain.\nStrictly follow the JSON structure. All fields are required.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -80
+      ],
+      "id": "e9c65a1e-e7fa-41d5-9c06-67d347d809c8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        40,
+        180
+      ],
+      "id": "3b9e18b4-ab6d-4422-af2f-7a50e566711a",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "YOUR_OPENROUTER_CREDENTIAL_ID",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"summary_file_safe\": \"a-concise-summary-in-lowercase-with-hyphens-suitable-for-filenames\",\n  \"summary_human_readable\": \"A short, descriptive title suitable for human-readable filenames (title case)\",\n  \"summarised_prompt\": \"A brief summary of the user's original question or request\",\n  \"html_response\": \"<p>HTML body content only — suitable for embedding in emails</p>\",\n  \"html_full_document\": \"<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>Full HTML content here</body></html>\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        300,
+        180
+      ],
+      "id": "1361cd49-c66d-460b-95ae-fef4db270803",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "YOUR_PDFSHIFT_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "source",
+              "value": "={{ $json.output.html_full_document }}"
+            },
+            {
+              "name": "landscape",
+              "value": "false"
+            },
+            {
+              "name": "use_print",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        -100
+      ],
+      "id": "231d490c-b2b4-4cf1-ba45-aff15ad28b0a",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "name": "={{ $json.output.summary_file_safe }}.pdf",
+        "driveId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_DRIVE_ID",
+          "mode": "list",
+          "cachedResultName": "Your Drive Name",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/YOUR_DRIVE_FOLDER_ID"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "https://drive.google.com/drive/folders/YOUR_FOLDER_ID",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        440,
+        -80
+      ],
+      "id": "563dc94e-0dfc-48ba-8086-2357f504ef7a",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_GOOGLE_DRIVE_CREDENTIAL_ID",
+          "name": "Your Google Drive Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Code').item.json.recipients }}",
+        "subject": "={{ $('AI Agent').item.json.output.summary_human_readable }} - Dr Dovid Berry's Answer",
+        "message": "=<!-- Email template content - see email-template.html file -->",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Dr Dovid Berry"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        620,
+        -80
+      ],
+      "id": "53359a7d-b855-43f1-9540-c107a638bb4f",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID_HERE",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Your Gmail Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        314.5
+      ],
+      "id": "67c6c3b9-f552-4935-927b-251a6a1a1dd4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "YOUR_GEMINI_CREDENTIAL_ID",
+          "name": "Your Gemini Account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "GENERATED_VERSION_ID",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "YOUR_INSTANCE_ID_HERE"
+  },
+  "id": "YOUR_WORKFLOW_ID_HERE",
+  "tags": []
+}
